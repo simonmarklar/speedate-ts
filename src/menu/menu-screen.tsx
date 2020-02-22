@@ -1,9 +1,43 @@
 import React from "react";
+import styled from "styled-components";
 
 import useDifficulties from "../config/difficulties";
-import Menu from "./menu/menu";
-import FadeIn from "../components/fade-in";
-import "./menu-screen.css";
+import Menu from "./menu";
+
+import logo from "./logo.png";
+
+const Screen = styled.div`
+  display: flex;
+  flex-direction: column;
+`;
+
+const Header = styled.div`
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-content: center;
+`;
+
+const HeaderItem = styled.div`
+  flex: 0 0 auto;
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+`;
+
+const Logo = styled.h1`
+  background: url(${logo}) no-repeat 50%;
+  width: 100%;
+  height: 200px;
+  text-indent: -999em;
+  display: block;
+`;
+
+const Text = styled.div`
+  text-align: center;
+  padding: 0 2em;
+`;
 
 export default function MenuScreen({ startGame }: { startGame: () => void }) {
   const { difficulties, selectDifficulty } = useDifficulties();
@@ -18,13 +52,13 @@ export default function MenuScreen({ startGame }: { startGame: () => void }) {
   };
 
   return (
-    <FadeIn className="menu-screen">
-      <div className="banner-container">
-        <div className="banner-item">
-          <h1 className="logo">Speedate!</h1>
-        </div>
-        <div className="banner-item">
-          <div className="intro">
+    <Screen>
+      <Header>
+        <HeaderItem>
+          <Logo>Speedate!</Logo>
+        </HeaderItem>
+        <HeaderItem>
+          <Text>
             <p>Douchey McDouchebag needs some lovin'</p>
             <p>
               Nothing like a bit of speed dating to get your
@@ -40,10 +74,10 @@ export default function MenuScreen({ startGame }: { startGame: () => void }) {
               The girls gradually reveal their interests. Discard the bad cards
               and keep the good ones to make a perfect hand and win them over!
             </p>
-          </div>
-        </div>
-      </div>
+          </Text>
+        </HeaderItem>
+      </Header>
       <Menu menuItems={menuItems} onClick={start} />
-    </FadeIn>
+    </Screen>
   );
 }

@@ -40,7 +40,7 @@ const DifficultyContext = React.createContext<Partial<DifficultyContextValue>>(
 );
 
 export function DifficultyProvider({ children }: PropsWithChildren<{}>) {
-  const [difficultyJson, isFetching, fetchError] = useFetch(
+  const [difficultyJson, isFetching, fetchError] = useFetch<Difficulty[]>(
     "/assets/config/difficulties.json"
   );
 
@@ -62,7 +62,7 @@ export function DifficultyProvider({ children }: PropsWithChildren<{}>) {
   );
 
   if (isFetching) return <Loading />;
-  if (fetchError) return <NetworkError message={fetchError.message} />;
+  if (fetchError) return <NetworkError message={fetchError} />;
 
   return (
     <DifficultyContext.Provider

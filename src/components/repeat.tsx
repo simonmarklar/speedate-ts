@@ -1,11 +1,13 @@
-import React, { ReactNode } from 'react'
+import React, { ReactNode } from "react";
 
-export default function Repeat<T> (props: {
-  list: T[],
-  children: (arg0: T) => ReactNode
-}) {
-  const { list, children } = props
-  const items = list.map(children)
+type Props<T> = {
+  list: T[];
+  children: (arg0: T, arg1?: any) => ReactNode;
+};
 
-  return <>{items}</>
+export default function Repeat<T>(props: Props<T>) {
+  const { list, children } = props;
+  const items = list.map(children);
+
+  return <>{items}</>;
 }

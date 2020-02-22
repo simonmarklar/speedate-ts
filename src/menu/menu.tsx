@@ -1,11 +1,16 @@
 import React from "react";
+import styled from "styled-components";
 
-import MenuButton from "../menu-button/menu-button";
-import Guy from "../../players/guy/guy";
-import Repeat from "../../components/repeat";
-import { Difficulty } from "../../config/difficulties";
+import MenuButton from "./menu-button";
+import Repeat from "../components/repeat";
+import { Difficulty } from "../config/difficulties";
 
-import "./menu.css";
+const MenuContainer = styled.div`
+  display: grid;
+  grid-template-columns: 33% 33% 33%;
+  width: 80%;
+  margin: 0 auto;
+`;
 
 type MenuItemConfig = { name: string } & Difficulty["menuItem"];
 type MenuProps = {
@@ -15,7 +20,7 @@ type MenuProps = {
 
 export default function Menu({ menuItems, onClick }: MenuProps) {
   return (
-    <div className="menu-container">
+    <MenuContainer>
       <Repeat list={menuItems}>
         {({ name, description, playerImage }) => (
           <MenuButton
@@ -24,10 +29,10 @@ export default function Menu({ menuItems, onClick }: MenuProps) {
             key={name}
             onClick={() => onClick(name)}
           >
-            <Guy imageUrl={playerImage} />
+            <img src={playerImage} alt={name} />
           </MenuButton>
         )}
       </Repeat>
-    </div>
+    </MenuContainer>
   );
 }

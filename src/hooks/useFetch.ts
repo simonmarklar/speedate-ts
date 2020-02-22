@@ -3,32 +3,34 @@ import { useState, useEffect } from "react";
 export default function useFetch<T>(
   url: string,
   options?: RequestInit | undefined
-): [T | null, boolean, Error] {
-  const [res, setRes] = useState(null);
+): [T | null, boolean, string | null] {
+  const [body, setRes] = useState<T | null>(null);
   const [isFetching, setIsFetching] = useState(true);
-  const [fetchError, setFetchError] = useState();
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
-    !res && fetchUrl();
+    if (!body) {
+      fetchUrl();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [url, options]);
+  }, [url, options, body]);
 
   async function fetchUrl() {
     try {
-      setIsFetching(true);
       const response = await fetch(url, options);
 
       if (response.ok) {
-        const json = await response.json();
+        const json = (await response.json()) as T;
         setRes(json);
-        return;
+        setFetchError(null);
       }
     } catch (e) {
-      setFetchError(e);
+      setFetchError(e.message);
+      setRes(null);
     } finally {
       setIsFetching(false);
     }
   }
 
-  return [res, isFetching, fetchError];
+  return [body, isFetching, fetchError];
 }

@@ -1,6 +1,7 @@
 import React, { PropsWithChildren, useContext } from "react";
 import useFetch from "../hooks/useFetch";
 import NetworkError from "../components/network-error";
+
 interface CardData {
   categoryIds: number[];
   name: string;
@@ -38,9 +39,11 @@ function useCardData() {
           ])
         )
       : new Map();
+
   const categories: Set<string> = categoriesJson
     ? new Set(categoriesJson)
     : new Set();
+
   return {
     cards,
     categories,
@@ -52,14 +55,6 @@ function useCardData() {
 }
 
 export function CardsProvider({ children }: PropsWithChildren<{}>) {
-  // const {
-  //   cards,
-  //   categories,
-  //   isFetchingCards,
-  //   fetchCardError,
-  //   isFetchingCategories,
-  //   fetchCategoriesError
-  // } = useCardData();
   const [cardJson, isFetchingCards, fetchCardError] = useFetch<CardData[]>(
     "/assets/config/cards.json"
   );
@@ -79,18 +74,20 @@ export function CardsProvider({ children }: PropsWithChildren<{}>) {
           ])
         )
       : new Map();
+
   const categories: Set<string> = categoriesJson
     ? new Set(categoriesJson)
     : new Set();
+
   if (isFetchingCards || isFetchingCategories) return <p>Loading...</p>;
   if (fetchCardError || fetchCategoriesError)
     return (
       <NetworkError
         message={
           fetchCardError
-            ? fetchCardError.message
+            ? fetchCardError
             : fetchCategoriesError
-            ? fetchCategoriesError.message
+            ? fetchCategoriesError
             : ""
         }
       />
@@ -110,6 +107,6 @@ export function CardsProvider({ children }: PropsWithChildren<{}>) {
 
 export default function() {
   const ctx = useContext(CardsContext) as CardsContextValue;
-  console.log("wheeee");
+
   return ctx;
 }

@@ -1,64 +1,73 @@
 import React from "react";
+import styled from "styled-components";
 
-import FadeIn from "../components/fade-in";
 import Loading from "../components/loading";
+import GuySprite from "../players/guy/guy";
+import GirlSprite from "../players/girl/girl";
+import PlayersCards from "./players-cards";
 
-import GuyAnimation from "./animations/guy";
-import GirlAnimation from "./animations/girl";
-import CardAnimation from "./animations/card";
-import Guy from "../players/guy/guy";
-import Girl from "../players/girl/girl";
-import Table from "./table";
-import Card from "./card";
-import Repeat from "../components/repeat";
+import useGameState from "./game-state/game-state";
 
-import useGameState from "./game-settings";
+import tableImg from "./table.png";
+import background from "./bg.jpg";
 
-import "./game-screen.css";
+const Table = styled.div`
+  background: url(${tableImg}) no-repeat center center;
+  width: 100vw;
+  height: 143px;
+  position: absolute;
+  bottom: 0;
+`;
+
+const Screen = styled.div`
+  background: url(${background}) repeat-x center top;
+  display: flex;
+  flex: 1 0 auto;
+  flex-direction: column;
+  align-items: flex-start;
+`;
+
+const Stage = styled.div`
+  flex: 1 1 auto;
+  min-height: 342px;
+  display: flex;
+  width: 100%;
+  overflow: hidden;
+  position: relative;
+`;
+
+const Interface = styled.div`
+  background: black;
+  display: flex;
+  flex-grow: 1;
+  width: 100%;
+`;
 
 export default function GameScreen({
   onBackToMenuClick
 }: {
   onBackToMenuClick: () => void;
 }) {
-  const { gameState, gameActions } = useGameState();
+  const { gameState, actionDispatchers } = useGameState();
 
-  if (!gameState || !gameActions) {
+  if (!gameState || !actionDispatchers) {
     return <Loading />;
   }
 
   return (
-    <FadeIn className="gameScreen">
-      <div className="stage">
-        <div className="boundary">
-          <Table />
-          <GuyAnimation>
-            <Guy imageUrl={gameState.difficulty.menuItem.playerImage} />
-          </GuyAnimation>
-          <GirlAnimation>
-            <Girl dateNumber={gameState.dateNumber} />
-          </GirlAnimation>
-        </div>
-      </div>
+    <Screen>
+      <Stage>
+        <Table />
+        <GuySprite imageUrl={gameState.difficulty.menuItem.playerImage} />
+        <GirlSprite dateNumber={gameState.dateNumber} />
+      </Stage>
 
-      <div className="interface">
-        <div className="playersCards">
-          <Repeat list={gameState.playersCards}>
-            {card => (
-              <CardAnimation>
-                <Card card={card} key={card} />
-              </CardAnimation>
-            )}
-          </Repeat>
-        </div>
+      <Interface>
+        <PlayersCards cards={gameState.playersCards} />
 
-        <button className="playYourHand" onClick={onBackToMenuClick}>
-          Play your hand
-        </button>
-        <button className="playYourHand" onClick={gameActions.deal}>
-          Hit me!
-        </button>
-      </div>
-    </FadeIn>
+        <button onClick={onBackToMenuClick}>Bail on this date</button>
+        <button onClick={actionDispatchers.deal}>Hit me!</button>
+      </Interface>
+    </Screen>
   );
 }

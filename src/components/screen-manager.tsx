@@ -2,7 +2,7 @@ import React, { useState } from "react";
 
 import MenuScreen from "../menu/menu-screen";
 import GameScreen from "../game/game-screen";
-import { GameStateProvider } from "../game/game-settings";
+import { GameStateProvider } from "../game/game-state/game-state";
 
 export default function ScreenManager() {
   const [screen, setScreen] = useState("menu");

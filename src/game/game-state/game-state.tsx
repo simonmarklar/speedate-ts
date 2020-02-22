@@ -1,27 +1,23 @@
 import { useReducer, useContext, PropsWithChildren, Dispatch } from "react";
-import useDifficulties, { Difficulty } from "../config/difficulties";
-import useCards, { CardMap } from "../config/cards";
+import useDifficulties, { Difficulty } from "../../config/difficulties";
+import useCards, { Card } from "../../config/cards";
 import React from "react";
-import { dealCards } from "./actions/deal-cards";
-import generateGirlsPreferences from "../players/girl/generate-preferences";
+import dealCards from "./deal-cards";
+import generateGirlsPreferences from "./generate-preferences";
 
-export type BaseData = {
+export interface GameState {
   difficulty: Difficulty;
-  cards: CardMap;
-  categories: Set<string>;
-};
 
-export type GameState = BaseData & {
-  dealersCards: string[];
-  playersCards: string[];
+  dealersCards: Card[];
+  playersCards: Card[];
   timeLeft: number;
   girlPreferences: {
     likedCategories: string[];
-    loves: string[];
-    hates: string[];
+    loves: Card[];
+    hates: Card[];
   };
   dateNumber: number;
-};
+}
 
 export interface GameAction {
   type: keyof Exclude<ReturnType<typeof gameActions>, GameState>;
@@ -29,30 +25,33 @@ export interface GameAction {
 
 interface GameStateContextType {
   gameState: Readonly<GameState>;
-  gameActions: Readonly<ReturnType<typeof gameActions>>;
+  actionDispatchers: Readonly<ReturnType<typeof gameActions>>;
 }
+
+type NewGameConfig = {
+  dealersCards: Card[];
+  playersCards: Card[];
+  categories: Set<string>;
+  difficulty: Difficulty;
+};
 
 const GameStateContext = React.createContext<Partial<GameStateContextType>>({});
 
-function startNewGame(
-  cards: CardMap,
-  categories: Set<string>,
-  difficulty: Difficulty
-) {
-  const dealersCards = Array.from(cards.keys());
-  const playersCards = [] as string[];
+function startNewGame({
+  categories,
+  dealersCards,
+  playersCards,
+  difficulty
+}: NewGameConfig): GameState {
   const timeLeft = difficulty.gameParams.timeLimit;
   const girlPreferences = generateGirlsPreferences({
     gameParams: difficulty.gameParams,
     categories: Array.from(categories.values()),
-
-    cards: Array.from(cards.values())
+    cards: dealersCards
   });
 
   return {
     difficulty,
-    categories,
-    cards,
     dealersCards,
     playersCards,
     timeLeft,
@@ -72,17 +71,26 @@ export function GameStateProvider({ children }: PropsWithChildren<{}>) {
   const { selectedDifficulty: difficulty } = useDifficulties();
   const { cards, categories } = useCards();
 
-  const init = () => startNewGame(cards, categories, difficulty);
+  const initState = () =>
+    startNewGame({
+      dealersCards: Array.from(cards.values()),
+      playersCards: [],
+      categories,
+      difficulty
+    });
 
+  // function reducer(state: Readonly<GameState>, action: { type: any }) {
   function reducer(state: Readonly<GameState>, action: Readonly<GameAction>) {
     switch (action.type) {
       case "init":
-        return init();
-      case "deal":
-        const newCards = dealCards(state);
         return {
           ...state,
-          playersCards: state.playersCards.concat(newCards)
+          ...initState()
+        };
+      case "deal":
+        return {
+          ...state,
+          playersCards: dealCards(state)
         };
       case "next":
         return {
@@ -94,12 +102,14 @@ export function GameStateProvider({ children }: PropsWithChildren<{}>) {
     }
   }
 
-  const [gameState, dispatch] = useReducer(reducer, {}, init);
+  const [gameState, dispatch] = useReducer(reducer, {}, initState);
 
   const actions = gameActions(dispatch);
 
   return (
-    <GameStateContext.Provider value={{ gameState, gameActions: actions }}>
+    <GameStateContext.Provider
+      value={{ gameState, actionDispatchers: actions }}
+    >
       {children}
     </GameStateContext.Provider>
   );

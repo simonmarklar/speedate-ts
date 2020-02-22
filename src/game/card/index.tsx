@@ -1,11 +1,32 @@
 import React from "react";
+import styled from "styled-components";
+import { animated } from "react-spring";
+import { Card } from "../../config/cards";
 
-import "./card.css";
+import cardImage from "./card.png";
 
-export default function Card({ card }: { card: string }) {
+const GameCard = styled(animated.div)`
+  background: url(${cardImage}) no-repeat center center;
+  text-align: center;
+  font-family: "Roboto Condensed", sans-serif;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  flex: 1 0 auto;
+  background-size: contain;
+  height: 100%;
+`;
+
+const CardText = styled.div`
+  flex: 1 1 auto;
+`;
+
+const PlayersCard = ({ card }: { card: Card }) => {
   return (
-    <div className="card">
-      <div className="cardText">{card}</div>
-    </div>
+    <GameCard>
+      <CardText>{card.name}</CardText>
+    </GameCard>
   );
-}
+};
+
+export default PlayersCard;
