@@ -9,6 +9,7 @@ const CardHolder = styled.div`
   flex: auto;
   display: flex;
   justify-content: space-around;
+  overflow-y: hidden;
 `;
 
 const config = { mass: 1, tension: 500, friction: 50 };
@@ -37,13 +38,6 @@ const PlayersCards = ({ cards }: { cards: TCard[] }) => {
           </animated.div>
         );
       })}
-      {/* <AnimatedRepeat
-        list={cards}
-        keyFn={card => card.name}
-        animation={animation}
-      >
-        {card => <Card card={card} />}
-      </AnimatedRepeat> */}
     </CardHolder>
   );
 };

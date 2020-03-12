@@ -79,7 +79,6 @@ export function GameStateProvider({ children }: PropsWithChildren<{}>) {
       difficulty
     });
 
-  // function reducer(state: Readonly<GameState>, action: { type: any }) {
   function reducer(state: Readonly<GameState>, action: Readonly<GameAction>) {
     switch (action.type) {
       case "init":
