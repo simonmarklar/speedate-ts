@@ -31,7 +31,7 @@ interface DateNightActions {
 }
 
 const freshDeck = (difficulty: Difficulty) => {
-  const deck = config.deckOfCards.map((i) => i);
+  const deck = config.deckOfCards.map((i) => ({...i}));
   return difficulty.name === "easy"
     ? generateGirlsDeck(deck, difficulty)
     : deck;
