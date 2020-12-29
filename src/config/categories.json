@@ -1,0 +1,14 @@
+[
+  { "id": 0, "name": "cute things" },
+  { "id": 1, "name": "scary stuff" },
+  { "id": 2, "name": "movies in general" },
+  { "id": 3, "name": "music in general" },
+  { "id": 4, "name": "nerdy stuff" },
+  { "id": 5, "name": "sports" },
+  { "id": 6, "name": "macho blokes" },
+  { "id": 7, "name": "sensitive guys" },
+  { "id": 8, "name": "sophisticated guys" },
+  { "id": 9, "name": "immature people" },
+  { "id": 10, "name": "wealthy men" },
+  { "id": 11, "name": "funny things" }
+]

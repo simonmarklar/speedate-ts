@@ -15,6 +15,13 @@
   "tslint.packageManager": "yarn",
   "typescript.validate.enable": true,
   "javascript.validate.enable": true,
-  "editor.fontFamily": "Fira Code",
-  "markdown.preview.fontSize": 18
+  "markdown.preview.fontSize": 18,
+  "git.ignoreLimitWarning": true,
+  "typescript.tsdk": "node_modules\\typescript\\lib",
+  "cSpell.words": [
+    "Douchebag",
+    "Douchey",
+    "Speedate",
+    "lovin"
+  ]
 }

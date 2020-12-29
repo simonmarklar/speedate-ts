@@ -1,9 +1,10 @@
 import React from "react";
 import styled from "styled-components";
-import { Card as TCard } from "../config/cards";
+import { Card as TCard } from "../config";
 import { useTrail, animated } from "react-spring";
 
-import Card from "./card";
+import Card from "./cards";
+import { PlayersCard } from "./hooks/use-date-night-config";
 
 const CardHolder = styled.div`
   flex: auto;
@@ -14,13 +15,19 @@ const CardHolder = styled.div`
 
 const config = { mass: 1, tension: 500, friction: 50 };
 
-const PlayersCards = ({ cards }: { cards: TCard[] }) => {
+const PlayersCards = ({
+  cards,
+  discard,
+}: {
+  cards: TCard[];
+  discard: (c: PlayersCard) => void;
+}) => {
   const trail = useTrail(cards.length, {
     y: 0,
     opacity: 1,
     width: "25%",
     from: { y: 200, opacity: 0.5, width: "25%" },
-    config
+    config,
   });
 
   return (
@@ -28,13 +35,13 @@ const PlayersCards = ({ cards }: { cards: TCard[] }) => {
       {trail.map(({ y, ...rest }, index) => {
         return (
           <animated.div
-            key={index}
+            key={cards[index].name}
             style={{
               ...rest,
-              transform: y.interpolate(y => `translate3d(0,${y}px,0)`)
+              transform: y.interpolate((y) => `translate3d(0,${y}px,0)`),
             }}
           >
-            <Card card={cards[index]} />
+            <Card card={cards[index]} onClick={() => discard(cards[index])} />
           </animated.div>
         );
       })}

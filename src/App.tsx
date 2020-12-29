@@ -1,16 +1,12 @@
 import React from "react";
-
-import { DifficultyProvider } from "./config/difficulties";
-import { CardsProvider } from "./config/cards";
-import ScreenManager from "./components/screen-manager";
+import { ScreenManager } from "./game/hooks/use-screen-manager";
+import { BrowserRouter as Router } from "react-router-dom";
 
 const App: React.FC = () => {
   return (
-    <DifficultyProvider>
-      <CardsProvider>
-        <ScreenManager />
-      </CardsProvider>
-    </DifficultyProvider>
+    <Router>
+      <ScreenManager />
+    </Router>
   );
 };
 

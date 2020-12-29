@@ -1,11 +1,12 @@
 import React, { ReactNode } from "react";
 
-export default function Repeat<T>(props: {
-  list: T[];
-  children: (arg0: T, arg1: any) => ReactNode;
+export default function Repeat<T>({ list, children }: {
+  list: Iterable<T> | ArrayLike<T>;
+  children: (value: T, index: number, array: T[]) => ReactNode;
 }) {
-  const { list, children } = props;
-  const items = list.map(children);
-
-  return <>{items}</>;
+  const data = Array.from(list)
+  if (!data.length) {
+    return null
+  }
+  return <>{data.map(children)}</>;
 }
