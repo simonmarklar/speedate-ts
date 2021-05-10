@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "fixpack": "^3.0.6",
-    "lodash": "^4.17.15",
+    "lodash": "^4.17.21",
     "maketypes": "^1.1.2",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
