@@ -149,3 +149,9 @@ input,
 select {
   vertical-align: middle;
 }
+
+@import url('https://fonts.googleapis.com/css?family=Bowlby+One+SC');
+
+text {
+  font-family: 'Bowlby One SC', cursive;
+}

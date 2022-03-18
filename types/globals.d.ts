@@ -47,20 +47,27 @@ interface DatePreferences {
   hatedCards: Card[]
 }
 
+DatePhase = 'SETTING_UP' | 'ACTIVE' | 'FINISHED'
+
 interface DateNightState {
+  datePhase: DatePhase
   dateNumber: number
-  timeLeft?: number
+  datePreferences?: DatePreferences
   dealersCards: Card[]
   playersCards: Card[]
-  datePreferences?: DatePreferences
   selectedCard?: Card
 }
 
-interface GlobalGameState {
+interface IGameState {
   activeScreen: GameScreenName
-  dateNightState?: DateNightState
   difficulty?: Difficulty
 }
+
+type ConcreteGameState = Required<IGameState>
+
+type InitialGameState = Pick<IGameState, 'activeScreen'> & Partial<IGameState>
+
+////////////////// actions
 
 interface ActionWithNoValue<T extends string> {
   type: T

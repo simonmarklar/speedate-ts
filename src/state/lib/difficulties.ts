@@ -1,5 +1,5 @@
 import { difficulties } from '../../config'
-import { assert } from '../../lib/types/assertions'
+import { assert } from '../../lib/types/type-helpers'
 
 export function getDifficulty(name: GameDifficultyName): Difficulty {
   const difficulty = difficulties.find((d) => d.name === name)

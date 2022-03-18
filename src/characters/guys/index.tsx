@@ -4,7 +4,7 @@ import mediumSprite from './guy1.png'
 import hardSprite from './guy2.png'
 
 interface Props {
-  difficulty?: GameDifficultyName
+  spriteId?: GameDifficultyName
 }
 
 const Container = styled.div`
@@ -13,8 +13,8 @@ const Container = styled.div`
   justify-content: center;
 `
 
-const Image = ({ difficulty }: Props) => {
-  switch (difficulty) {
+const Image = ({ spriteId }: Props) => {
+  switch (spriteId) {
     case 'MEDIUM':
       return <img src={mediumSprite} alt="You" />
     case 'HARD':
@@ -24,10 +24,10 @@ const Image = ({ difficulty }: Props) => {
   }
 }
 
-export default function Player(props: Props) {
+export default function Player({ spriteId }: Props) {
   return (
     <Container>
-      <Image {...props} />
+      <Image spriteId={spriteId} />
     </Container>
   )
 }

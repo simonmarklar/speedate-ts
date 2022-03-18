@@ -1,10 +1,12 @@
-import { assert } from '../lib/types/assertions'
+import { assert } from '../lib/types/type-helpers'
 import generateDatePreferences from './lib/generate-date-preferences'
 import { cards, PLAYER_MAX_CARDS } from '../config'
 import { cardIsInCategory, takeCards } from './lib/cards-categories'
 
 export type DateNightAction =
   | ActionWithNoValue<'datenight.next'>
+  | ActionWithNoValue<'datenight.startDate'>
+  | ActionWithNoValue<'datenight.endDate'>
   | ActionWithNoValue<'player.getCards'>
   | ActionWithValue<'player.dragCard', { card: Card }>
   | ActionWithValue<'player.pickupCard', { card: Card | undefined }>
@@ -16,8 +18,8 @@ export const init = (difficulty: Difficulty): DateNightState => {
   })
 
   return {
+    datePhase: 'SETTING_UP',
     dateNumber: 1,
-    timeLeft: difficulty.gameParams.timeLimit,
     datePreferences,
     dealersCards:
       difficulty.name === 'EASY'
@@ -46,13 +48,27 @@ export const createReducer = (difficulty: Difficulty) =>
 
         return {
           ...currentState,
+          datePhase: 'SETTING_UP',
           dateNumber: currentState.dateNumber++,
-          timeLeft: difficulty.gameParams.timeLimit,
           datePreferences,
+          playersCards: [],
           dealersCards:
             difficulty.name === 'EASY'
               ? cards.filter(cardIsInCategory(datePreferences.likedCategories))
               : cards,
+        }
+      }
+      case 'datenight.startDate': {
+        return {
+          ...currentState,
+          datePhase: 'ACTIVE',
+        }
+      }
+      case 'datenight.endDate': {
+        return {
+          ...currentState,
+          datePhase: 'FINISHED',
+          datePreferences: undefined,
         }
       }
       case 'player.getCards': {
@@ -71,7 +87,7 @@ export const createReducer = (difficulty: Difficulty) =>
             cardsLeft,
           ),
         )
-
+        console.log({ newCards })
         return {
           ...currentState,
           dealersCards: currentState.dealersCards?.filter(

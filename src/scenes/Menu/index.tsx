@@ -134,7 +134,7 @@ export default function MenuScreen() {
                   dispatch({ type: 'game.start', value: name })
                 }}
               >
-                <Player difficulty={name} />
+                <Player spriteId={name} />
               </MenuButton>
             </ListItem>
           ))}

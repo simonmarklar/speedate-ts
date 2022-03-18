@@ -3,12 +3,27 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@craco/craco": "^6.4.0",
-    "framer-motion": "^6.2.4",
+    "@craco/craco": "^6.4.3",
+    "framer-motion": "^6.2.8",
     "lodash": "^4.17.21",
     "react": "^17.0.2",
     "react-dom": "^17.0.2",
-    "styled-components": "^5.3.3"
+    "styled-components": "^5.3.3",
+    "ts-toolbelt": "^9.6.0"
+  },
+  "devDependencies": {
+    "@testing-library/jest-dom": "^5.15.0",
+    "@testing-library/react": "^11.2.7",
+    "@testing-library/user-event": "^12.8.3",
+    "@types/jest": "^26.0.24",
+    "@types/lodash": "^4.14.177",
+    "@types/node": "^12.20.36",
+    "@types/react": "^17.0.34",
+    "@types/react-dom": "^17.0.11",
+    "@types/styled-components": "^5.1.22",
+    "react-error-overlay": "6.0.9",
+    "react-scripts": "4.0.3",
+    "typescript": "^4.6.2"
   },
   "scripts": {
     "start": "craco start",
@@ -33,20 +48,5 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
-  },
-  "devDependencies": {
-    "@types/lodash": "^4.14.177",
-    "@types/styled-components": "^5.1.22",
-    "react-error-overlay": "6.0.9",
-    "typescript": "^4.5.5",
-    "@types/jest": "^26.0.24",
-    "@types/node": "^12.20.36",
-    "@types/react": "^17.0.34",
-    "@types/react-dom": "^17.0.11",
-    "react-scripts": "4.0.3",
-    "web-vitals": "^1.1.2",
-    "@testing-library/jest-dom": "^5.15.0",
-    "@testing-library/react": "^11.2.7",
-    "@testing-library/user-event": "^12.8.3"
   }
 }

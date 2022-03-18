@@ -1,18 +1,18 @@
 import React, { useRef } from 'react'
 
 import styled from 'styled-components'
-import { motion } from 'framer-motion'
+import { AnimatePresence, motion } from 'framer-motion'
 
 import tableImg from './table.png'
 import background from './bg.jpg'
+import cardAreaBg from './green-felt.jpg'
 
-import Player from '../../characters/guys'
-import Girl from '../../characters/girls'
+import Player from '../../../characters/guys'
+import Girl from '../../../characters/girls'
 import PlayersCards from './PlayersCards'
-import {
-  useGameState,
-  useDispatch as useGameStateDispatch,
-} from '../../hooks/useGameState'
+import { useDateNightState } from '../../../hooks/useDateNightState'
+import Timer from './Timer'
+import { useGameState } from '../../../hooks/useGameState'
 
 const TableContainer = styled.div`
   background: url(${tableImg}) no-repeat center center;
@@ -27,11 +27,7 @@ const TableContainer = styled.div`
 const Table = motion(
   React.forwardRef<HTMLDivElement, { children?: React.ReactNode }>(
     ({ children }, ref) => {
-      return (
-        <TableContainer ref={ref} onDragOver={() => console.log('mouse enter')}>
-          {children}
-        </TableContainer>
-      )
+      return <TableContainer ref={ref}>{children}</TableContainer>
     },
   ),
 )
@@ -56,25 +52,42 @@ const People = styled.div`
   flex-direction: row;
 `
 
+const CardArea = styled.div`
+  flex: 1 0 auto;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-evenly;
+  padding: 1rem 2rem;
+  background: url(${cardAreaBg}) center center;
+  background-size: contain;
+  height: 20vh;
+`
+CardArea.displayName = 'CardArea'
+
 export default function TableForTwo() {
-  const dispatchGameAction = useGameStateDispatch()
-  const { difficulty } = useGameState()
   const discardCardDropTargetRef = useRef<HTMLDivElement>(null)
+  const { datePhase } = useDateNightState()
+  const { difficulty } = useGameState()
 
   return (
     <>
       <Scene>
+        <AnimatePresence>
+          <Timer
+            dateLength={difficulty?.gameParams.timeLimit}
+            isOn={datePhase === 'ACTIVE'}
+          />
+        </AnimatePresence>
         <People>
-          <Player difficulty={difficulty?.name} />
+          <Player spriteId={difficulty?.name} />
           <Girl />
         </People>
         <Table ref={discardCardDropTargetRef} />
       </Scene>
 
-      <PlayersCards discardTarget={discardCardDropTargetRef} />
-      <button onClick={() => dispatchGameAction({ type: 'game.toMenu' })}>
-        Menu
-      </button>
+      <CardArea>
+        <PlayersCards discardTarget={discardCardDropTargetRef} />
+      </CardArea>
     </>
   )
 }

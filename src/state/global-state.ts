@@ -5,9 +5,9 @@ export type GlobalAction =
   | ActionWithValue<'game.start', GameDifficultyName>
 
 export default function globalStateReducer(
-  currentState: GlobalGameState,
+  currentState: IGameState,
   action: GlobalAction,
-): GlobalGameState {
+): IGameState {
   if (!action.type) return currentState
 
   switch (action.type) {
@@ -19,11 +19,13 @@ export default function globalStateReducer(
     case 'game.start': {
       const difficulty = getDifficulty(action.value)
 
-      return {
+      const state: Required<IGameState> = {
         ...currentState,
         activeScreen: 'DATE',
         difficulty,
       }
+
+      return state
     }
     default:
       return currentState

@@ -15,6 +15,7 @@ interface IDateNightStateContext {
 
 const initialDateNightState: DateNightState = {
   dateNumber: 1,
+  datePhase: 'SETTING_UP',
   playersCards: [],
   dealersCards: [],
 }

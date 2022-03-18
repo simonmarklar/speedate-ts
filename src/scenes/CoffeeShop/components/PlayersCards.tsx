@@ -1,34 +1,43 @@
 import styled from 'styled-components'
 
-import { AnimatePresence, motion, PanInfo, Variants } from 'framer-motion'
+import { AnimatePresence, motion, useAnimation, Variants } from 'framer-motion'
 import React, { useEffect } from 'react'
 
-import PlayersCard from '../../components/Card'
+import PlayersCard from '../../../components/Card'
+
 import {
   useDateNightDispatch,
   useDateNightState,
-} from '../../hooks/useDateNightState'
-
-interface Props {
-  discardTarget: React.RefObject<HTMLDivElement>
-}
+} from '../../../hooks/useDateNightState'
 
 const cardVariants: Variants = {
   initial: {
-    y: 500,
+    y: 200,
     opacity: 0,
   },
-  enter: (index: number) => ({
-    opacity: 1,
+  disabled: (index: number) => ({
     y: 0,
+    rotate: 360,
     transition: {
-      ease: 'anticipate',
+      type: 'spring',
+      duration: 1.5,
       delay: index * 0.25,
     },
   }),
+  enter: (index: number) => {
+    return {
+      opacity: 1,
+      y: 0,
+      transition: {
+        ease: 'easeOut',
+        delay: index * 0.25,
+      },
+    }
+  },
   dragging: {
     scale: 1.2,
     opacity: 0.8,
+    zIndex: 10,
   },
   drop: {
     rotate: 360,
@@ -48,36 +57,26 @@ const cardVariants: Variants = {
     transition: {
       ease: 'anticipate',
       duration: 1.25,
-      staggerChildren: 0.4,
     },
   },
 }
 
 const CardHolder = motion(styled.div`
-  flex: 0 0 auto;
+  flex: 1 0 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;
-  margin: 0 2rem;
 `)
+CardHolder.displayName = 'CardHolder'
+
+interface Props {
+  discardTarget: React.RefObject<HTMLDivElement>
+}
 
 export default function PlayersCards({ discardTarget }: Props) {
   const dispatchDateNightAction = useDateNightDispatch()
-  const { playersCards, selectedCard } = useDateNightState()
-  const handleDragOverTarget = React.useCallback(
-    (point: PanInfo['point']) => {
-      if (selectedCard) {
-        dispatchDateNightAction({
-          type: 'player.dropCard',
-          value: {
-            card: selectedCard,
-            isDiscarding: point.y < Number(discardTarget.current?.offsetTop),
-          },
-        })
-      }
-    },
-    [discardTarget, dispatchDateNightAction, selectedCard],
-  )
+  const { playersCards, selectedCard, datePhase } = useDateNightState()
+  const controls = useAnimation()
 
   useEffect(() => {
     if (playersCards && playersCards.length < 5) {
@@ -85,29 +84,33 @@ export default function PlayersCards({ discardTarget }: Props) {
     }
   }, [dispatchDateNightAction, playersCards])
 
+  useEffect(() => {
+    const startDate = async () => {
+      await controls.start('enter')
+      dispatchDateNightAction('datenight.startDate')
+    }
+
+    if (datePhase === 'SETTING_UP' && playersCards) {
+      startDate()
+    }
+  }, [controls, datePhase, dispatchDateNightAction, playersCards])
+
   return (
-    <CardHolder
-      inherit={false}
-      initial={{ flexGrow: 0, display: 'block' }}
-      animate={{
-        flexGrow: 1,
-        display: 'flex',
-        transition: { when: 'beforeChildren' },
-      }}
-    >
+    <CardHolder inherit={false}>
       <AnimatePresence>
         {playersCards.map(function renderCard(card, index) {
           return (
             <PlayersCard
               card={card}
-              custom={index}
+              isFaceDown={datePhase === 'FINISHED'}
               key={card.name}
+              custom={index}
               variants={cardVariants}
               initial="initial"
-              animate="enter"
-              whileDrag="dragging"
+              animate={datePhase === 'SETTING_UP' ? controls : 'enter'}
               exit={selectedCard?.name === card.name ? 'drop' : 'exit'}
-              drag
+              whileDrag="dragging"
+              drag={datePhase === 'ACTIVE'}
               dragElastic={1}
               dragSnapToOrigin={selectedCard?.name === card.name}
               dragConstraints={
@@ -120,8 +123,18 @@ export default function PlayersCards({ discardTarget }: Props) {
                   value: { card },
                 })
               }}
-              onDragEnd={(event, { point }) => handleDragOverTarget(point)}
-              layoutId={selectedCard?.name === card.name ? 'drop' : undefined}
+              onDragEnd={(event, { point }) => {
+                if (selectedCard) {
+                  dispatchDateNightAction({
+                    type: 'player.dropCard',
+                    value: {
+                      card: selectedCard,
+                      isDiscarding:
+                        point.y < Number(discardTarget.current?.offsetTop),
+                    },
+                  })
+                }
+              }}
             />
           )
         })}
