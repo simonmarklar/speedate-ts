@@ -1,8 +1,8 @@
-import { getDifficulty } from './lib/difficulties'
+import { getDifficulty } from '../lib/difficulties'
 
 export type GlobalAction =
   | ActionWithNoValue<'game.toMenu'>
-  | ActionWithValue<'game.start', GameDifficultyName>
+  | Action<'game.start', GameDifficultyName>
 
 export default function globalStateReducer(
   currentState: IGameState,

@@ -1,6 +1,6 @@
 import styled from 'styled-components'
 
-import { AnimatePresence, motion, useAnimation, Variants } from 'framer-motion'
+import { AnimatePresence, motion, Variants } from 'framer-motion'
 import React, { useEffect } from 'react'
 
 import PlayersCard from '../../../components/Card'
@@ -9,6 +9,7 @@ import {
   useDateNightDispatch,
   useDateNightState,
 } from '../../../hooks/useDateNightState'
+import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
 
 const cardVariants: Variants = {
   initial: {
@@ -31,6 +32,7 @@ const cardVariants: Variants = {
       transition: {
         ease: 'easeOut',
         delay: index * 0.25,
+        duration: 0.25,
       },
     }
   },
@@ -76,24 +78,13 @@ interface Props {
 export default function PlayersCards({ discardTarget }: Props) {
   const dispatchDateNightAction = useDateNightDispatch()
   const { playersCards, selectedCard, datePhase } = useDateNightState()
-  const controls = useAnimation()
+  const unmountSignal = useUnmountedSignal()
 
   useEffect(() => {
-    if (playersCards && playersCards.length < 5) {
+    if (playersCards && playersCards.length < 5 && !unmountSignal.aborted) {
       dispatchDateNightAction('player.getCards')
     }
-  }, [dispatchDateNightAction, playersCards])
-
-  useEffect(() => {
-    const startDate = async () => {
-      await controls.start('enter')
-      dispatchDateNightAction('datenight.startDate')
-    }
-
-    if (datePhase === 'SETTING_UP' && playersCards) {
-      startDate()
-    }
-  }, [controls, datePhase, dispatchDateNightAction, playersCards])
+  }, [dispatchDateNightAction, playersCards, unmountSignal.aborted])
 
   return (
     <CardHolder inherit={false}>
@@ -107,7 +98,7 @@ export default function PlayersCards({ discardTarget }: Props) {
               custom={index}
               variants={cardVariants}
               initial="initial"
-              animate={datePhase === 'SETTING_UP' ? controls : 'enter'}
+              animate={'enter'}
               exit={selectedCard?.name === card.name ? 'drop' : 'exit'}
               whileDrag="dragging"
               drag={datePhase === 'ACTIVE'}
@@ -133,6 +124,14 @@ export default function PlayersCards({ discardTarget }: Props) {
                         point.y < Number(discardTarget.current?.offsetTop),
                     },
                   })
+                }
+              }}
+              onAnimationComplete={(variantName) => {
+                if (
+                  variantName === 'enter' &&
+                  index >= playersCards.length - 1
+                ) {
+                  dispatchDateNightAction('datenight.startDate')
                 }
               }}
             />

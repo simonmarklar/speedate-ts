@@ -40,19 +40,23 @@ const Text = styled.div`
   padding: 0 2em;
 `
 
-const ButtonList = styled(motion.ul)`
+const ButtonList = motion(styled.ul`
   position: relative;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-`
-const ListItem = styled(motion.li)`
+`)
+ButtonList.displayName = 'ButtonList'
+
+const ListItem = motion(styled.li`
   list-style: none;
-  flex: 0 1 100%;
+  max-width: 33%;
+  /* flex: 0 1 25%;
   flex-direction: column;
   justify-content: center;
-  display: flex;
-`
+  display: flex; */
+`)
+ListItem.displayName = 'ListItem'
 
 const buttons: Variants = {
   initial: {
@@ -62,7 +66,6 @@ const buttons: Variants = {
   enter: (i) => ({
     x: 0,
     opacity: 1,
-    flexGrow: 0,
     transition: {
       ease: 'anticipate',
       duration: 1.25,
@@ -72,7 +75,6 @@ const buttons: Variants = {
   exit: (i) => ({
     x: (i + 1) * 100 * 4 + '%',
     opacity: 0,
-    flexGrow: 1,
     transition: {
       ease: 'linear',
       duration: 0.4,

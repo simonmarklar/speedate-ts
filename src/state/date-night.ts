@@ -1,16 +1,18 @@
 import { assert } from '../lib/types/type-helpers'
-import generateDatePreferences from './lib/generate-date-preferences'
-import { cards, PLAYER_MAX_CARDS } from '../config'
-import { cardIsInCategory, takeCards } from './lib/cards-categories'
+import generateDatePreferences from '../lib/generate-date-preferences'
+import { cards, PLAYER_MAX_CARDS, MAX_DATE_IMAGES } from '../config'
+import { cardIsInCategory, takeCards } from '../lib/cards-categories'
+import makeRandomPlucker from '../lib/random-pluck'
+import { sequence } from '../lib/array-utils'
 
 export type DateNightAction =
   | ActionWithNoValue<'datenight.next'>
   | ActionWithNoValue<'datenight.startDate'>
   | ActionWithNoValue<'datenight.endDate'>
   | ActionWithNoValue<'player.getCards'>
-  | ActionWithValue<'player.dragCard', { card: Card }>
-  | ActionWithValue<'player.pickupCard', { card: Card | undefined }>
-  | ActionWithValue<'player.dropCard', { card: Card; isDiscarding: boolean }>
+  | Action<'player.dragCard', { card: Card }>
+  | Action<'player.pickupCard', { card?: Card }>
+  | Action<'player.dropCard', { card: Card; isDiscarding: boolean }>
 
 export const init = (difficulty: Difficulty): DateNightState => {
   const datePreferences = generateDatePreferences({
@@ -26,11 +28,14 @@ export const init = (difficulty: Difficulty): DateNightState => {
         ? cards.filter(cardIsInCategory(datePreferences.likedCategories))
         : cards,
     playersCards: [],
+    girlsAlreadySeen: [],
   }
 }
 
-export const createReducer = (difficulty: Difficulty) =>
-  function globalStateReducer(
+export const createReducer = (difficulty: Difficulty) => {
+  const dateImages = makeRandomPlucker(sequence(MAX_DATE_IMAGES - 1))
+
+  return function globalStateReducer(
     currentState: DateNightState,
     action: DateNightAction,
   ): DateNightState {
@@ -46,6 +51,12 @@ export const createReducer = (difficulty: Difficulty) =>
           difficulty: difficulty,
         })
 
+        const dateImage = dateImages.next()
+        if (dateImage.done) {
+          console.log('no more images')
+          return currentState
+        }
+        console.log('date image', { dateImage })
         return {
           ...currentState,
           datePhase: 'SETTING_UP',
@@ -56,12 +67,21 @@ export const createReducer = (difficulty: Difficulty) =>
             difficulty.name === 'EASY'
               ? cards.filter(cardIsInCategory(datePreferences.likedCategories))
               : cards,
+          girlsAlreadySeen: dateImage.value
+            ? currentState.girlsAlreadySeen.concat([dateImage.value])
+            : currentState.girlsAlreadySeen,
         }
       }
       case 'datenight.startDate': {
+        const dateImage = dateImages.next()
+        console.log('date image', { dateImage })
         return {
           ...currentState,
           datePhase: 'ACTIVE',
+          girlsAlreadySeen:
+            typeof dateImage.value === 'number'
+              ? currentState.girlsAlreadySeen.concat([dateImage.value])
+              : currentState.girlsAlreadySeen,
         }
       }
       case 'datenight.endDate': {
@@ -100,6 +120,7 @@ export const createReducer = (difficulty: Difficulty) =>
       }
       case 'player.pickupCard': {
         assert(currentState, 'dateNightState should exist')
+        assert(action.value, 'picked up card missing')
         const { card } = action.value
 
         return {
@@ -109,6 +130,7 @@ export const createReducer = (difficulty: Difficulty) =>
       }
       case 'player.dropCard': {
         assert(currentState, 'dateNightState should exist')
+        assert(action.value, 'picked up card missing')
         const { card, isDiscarding } = action.value
 
         const playersCards = isDiscarding
@@ -121,3 +143,4 @@ export const createReducer = (difficulty: Difficulty) =>
 
     return currentState
   }
+}

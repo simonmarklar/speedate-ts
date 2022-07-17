@@ -2,6 +2,8 @@ import { motion, Variants } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useDateNightDispatch } from '../../../hooks/useDateNightState'
+import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
+import tick from '../../../lib/tick'
 
 const Digit = styled.div<{ dangerMode: boolean }>`
   background: #000;
@@ -30,13 +32,6 @@ interface Props {
   isOn?: boolean
 }
 
-const tick = () =>
-  new Promise((resolve) => {
-    setTimeout(() => {
-      resolve(true)
-    }, 1000)
-  })
-
 const timerAnimations: Variants = {
   initial: {
     scale: 0,
@@ -45,10 +40,10 @@ const timerAnimations: Variants = {
   animate: {
     scale: 1,
     opacity: 1,
+    rotateZ: 0,
     transition: {
-      ease: 'backOut',
+      ease: 'easeIn',
       duration: 1.25,
-      staggerChildren: 0.4,
     },
   },
   danger: {
@@ -88,21 +83,28 @@ const timerAnimations: Variants = {
 export default function Timer({ dateLength, isOn = false }: Props) {
   const [timeLeft, setTimeLeft] = useState(dateLength)
   const dispatch = useDateNightDispatch()
+  const unmountSignal = useUnmountedSignal()
 
   useEffect(() => {
+    if (unmountSignal.aborted || !isOn) return
     const go = async () => {
-      await tick()
-
-      setTimeLeft((current) => {
-        if (current !== undefined) {
-          return Math.max(0, current - 1)
-        } else {
-          return Math.max(0, dateLength || 0)
+      try {
+        await tick(1000, unmountSignal)
+        if (!unmountSignal.aborted) {
+          setTimeLeft((current) => {
+            if (current !== undefined) {
+              return Math.max(0, current - 1)
+            } else {
+              return Math.max(0, dateLength || 0)
+            }
+          })
         }
-      })
+      } catch (e) {
+        console.log('unmount signal fired: ', e)
+      }
     }
 
-    if (!isOn || timeLeft === undefined) {
+    if (timeLeft === undefined) {
       return
     }
 
@@ -111,14 +113,24 @@ export default function Timer({ dateLength, isOn = false }: Props) {
     } else if (timeLeft <= 0) {
       dispatch('datenight.endDate')
     }
-  }, [dateLength, dispatch, isOn, timeLeft])
+  }, [
+    dateLength,
+    dispatch,
+    isOn,
+    timeLeft,
+    unmountSignal,
+    unmountSignal.aborted,
+  ])
 
-  const isInDangerMode = useMemo(() => (timeLeft ?? 0) < 10, [timeLeft])
+  const isInDangerMode = useMemo(
+    () => isOn && (timeLeft ?? 0) < 10,
+    [isOn, timeLeft],
+  )
 
   return (
     <Clock
       variants={timerAnimations}
-      animate={isInDangerMode ? 'danger' : 'animate'}
+      animate={!isOn ? 'initial' : isInDangerMode ? 'danger' : 'animate'}
       initial="initial"
       exit="exit"
     >

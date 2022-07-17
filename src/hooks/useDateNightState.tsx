@@ -18,6 +18,7 @@ const initialDateNightState: DateNightState = {
   datePhase: 'SETTING_UP',
   playersCards: [],
   dealersCards: [],
+  girlsAlreadySeen: [],
 }
 
 const DateNightStateContext = React.createContext<IDateNightStateContext>({
@@ -56,7 +57,7 @@ export function useDateNightDispatch() {
   const { dispatch } = useContext(DateNightStateContext)
 
   return React.useCallback(
-    <T extends DateNightAction | ActionsWithNoValue>(
+    <T extends DateNightAction['type'] | ActionsWithNoValue>(
       action: T extends ActionsWithNoValue
         ? ActionsWithNoValue
         : DateNightAction,

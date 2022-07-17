@@ -7,27 +7,19 @@ interface Props {
   spriteId?: GameDifficultyName
 }
 
-const Container = styled.div`
-  flex: 1 1 auto;
-  display: flex;
-  justify-content: center;
-`
+const GuyImage = styled.img``
 
 const Image = ({ spriteId }: Props) => {
   switch (spriteId) {
     case 'MEDIUM':
-      return <img src={mediumSprite} alt="You" />
+      return <GuyImage src={mediumSprite} alt="You" />
     case 'HARD':
-      return <img src={hardSprite} alt="You" />
+      return <GuyImage src={hardSprite} alt="You" />
     default:
-      return <img src={easySprite} alt="You" />
+      return <GuyImage src={easySprite} alt="You" />
   }
 }
 
 export default function Player({ spriteId }: Props) {
-  return (
-    <Container>
-      <Image spriteId={spriteId} />
-    </Container>
-  )
+  return <Image spriteId={spriteId} />
 }

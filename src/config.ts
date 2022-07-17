@@ -1,4 +1,5 @@
 export const PLAYER_MAX_CARDS = 5
+export const MAX_DATE_IMAGES = 10
 
 export const difficulties: Difficulty[] = [
   {
@@ -37,7 +38,7 @@ export const difficulties: Difficulty[] = [
       numberOfLikes: 1,
       numberOfLoves: 1,
       numberOfHates: 2,
-      timeLimit: 30,
+      timeLimit: 5, //30,
       phoneNumberThreshold: 4,
       soulmateThreshold: 7,
     },
@@ -197,3 +198,12 @@ export const cards: Card[] = [
     name: 'Tabloids',
   },
 ]
+
+export const spriteLayers = {
+  BACKGROUND: 100,
+  FOCUS: 500,
+  FOREGROUND: 1000,
+  UI: 1500,
+}
+
+export const timeBetweenThoughts = 2000

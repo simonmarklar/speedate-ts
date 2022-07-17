@@ -1,14 +1,14 @@
 import React, { useRef } from 'react'
 
 import styled from 'styled-components'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, motion, Variants } from 'framer-motion'
 
 import tableImg from './table.png'
 import background from './bg.jpg'
 import cardAreaBg from './green-felt.jpg'
 
 import Player from '../../../characters/guys'
-import Girl from '../../../characters/girls'
+import YourDate from './YourDate'
 import PlayersCards from './PlayersCards'
 import { useDateNightState } from '../../../hooks/useDateNightState'
 import Timer from './Timer'
@@ -40,8 +40,9 @@ const Scene = styled(motion.div)`
   display: flex;
   overflow: hidden;
   position: relative;
-  background: url(${background}) repeat-x center top;
-  background-size: contain;
+  background: url(${background}) center top;
+  background-repeat: round;
+  background-size: cover;
 `
 Scene.displayName = 'Scene'
 
@@ -64,6 +65,31 @@ const CardArea = styled.div`
 `
 CardArea.displayName = 'CardArea'
 
+const dateAnimationVariants: Variants = {
+  initial: {
+    x: 5000,
+    opacity: 0,
+  },
+  enter: {
+    x: 0,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      duration: 3,
+      delay: 1.75,
+    },
+  },
+  exit: {
+    x: 5000,
+    opacity: 0,
+    transition: {
+      type: 'spring',
+      duration: 3,
+      delay: 0,
+    },
+  },
+}
+
 export default function TableForTwo() {
   const discardCardDropTargetRef = useRef<HTMLDivElement>(null)
   const { datePhase } = useDateNightState()
@@ -80,7 +106,19 @@ export default function TableForTwo() {
         </AnimatePresence>
         <People>
           <Player spriteId={difficulty?.name} />
-          <Girl />
+          <AnimatePresence>
+            {datePhase === 'ACTIVE' && (
+              <motion.div
+                variants={dateAnimationVariants}
+                initial="initial"
+                animate="enter"
+                exit="exit"
+              >
+                {' '}
+                <YourDate />
+              </motion.div>
+            )}
+          </AnimatePresence>
         </People>
         <Table ref={discardCardDropTargetRef} />
       </Scene>

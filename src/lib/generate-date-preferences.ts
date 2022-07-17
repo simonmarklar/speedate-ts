@@ -1,4 +1,4 @@
-import { categories, cards } from '../../config'
+import { categories, cards } from '../config'
 
 import {
   takeCards,

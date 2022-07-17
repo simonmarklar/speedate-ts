@@ -42,14 +42,16 @@ interface PlayerState {
 }
 
 interface DatePreferences {
+  dislikedCategories?: string[]
   likedCategories: string[]
   lovedCards: Card[]
   hatedCards: Card[]
 }
 
-DatePhase = 'SETTING_UP' | 'ACTIVE' | 'FINISHED'
+type DatePhase = 'SETTING_UP' | 'ACTIVE' | 'FINISHED'
 
 interface DateNightState {
+  girlsAlreadySeen: number[]
   datePhase: DatePhase
   dateNumber: number
   datePreferences?: DatePreferences
@@ -69,14 +71,11 @@ type InitialGameState = Pick<IGameState, 'activeScreen'> & Partial<IGameState>
 
 ////////////////// actions
 
-interface ActionWithNoValue<T extends string> {
-  type: T
-}
-
-interface ActionWithValue<T extends string, V = any> {
+interface Action<T extends string, V = any> {
   type: T
   value: V
 }
+type ActionWithNoValue<T extends string> = Omit<Action<T>, 'value'>
 
 type ActionTypes<ActionUnion> = Extract<ActionUnion, { value: any }> extends A
   ? A
