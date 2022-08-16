@@ -54,7 +54,7 @@ const People = styled.div`
 `
 
 const CardArea = styled.div`
-  flex: 1 0 auto;
+  flex: 0 0 auto;
   display: flex;
   flex-direction: row;
   justify-content: space-evenly;

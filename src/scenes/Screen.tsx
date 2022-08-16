@@ -7,7 +7,7 @@ import useRemoveComponentIfSafe from '../hooks/useRemoveComponentIfSafe'
 import { useGameState } from '../hooks/useGameState'
 import { AnimatePresence } from 'framer-motion'
 
-const screen: Variants = {
+const screenAnimations: Variants = {
   initial: {
     x: '100vw',
   },
@@ -42,7 +42,7 @@ function Screen({ name }: { name: GameScreenName }) {
 
   return (
     <ScreenContainer
-      variants={screen}
+      variants={screenAnimations}
       initial="initial"
       animate="enter"
       exit="exit"

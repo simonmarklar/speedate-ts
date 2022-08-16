@@ -1,5 +1,8 @@
-const tick = (lengthInMs: number, abortSignal?: AbortSignal) =>
-  new Promise((resolve, reject) => {
+export default function timePassing(
+  lengthInMs: number,
+  abortSignal?: AbortSignal,
+): Promise<void> {
+  return new Promise((resolve, reject) => {
     if (abortSignal?.aborted) {
       reject('aborted')
     }
@@ -11,5 +14,4 @@ const tick = (lengthInMs: number, abortSignal?: AbortSignal) =>
       reject('aborted')
     })
   })
-
-export default tick
+}

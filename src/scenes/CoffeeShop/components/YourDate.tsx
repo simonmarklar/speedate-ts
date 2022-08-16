@@ -13,7 +13,7 @@ import { useDateNightState } from '../../../hooks/useDateNightState'
 import { useGameState } from '../../../hooks/useGameState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
 import makeRandomSelectIterator from '../../../lib/random-select'
-import tick from '../../../lib/tick'
+import tick from '../../../lib/time-passing'
 import SpeechBubble from './SpeechBubble'
 import { timeBetweenThoughts } from '../../../config'
 
@@ -24,8 +24,6 @@ const DateContainer = motion(styled.div`
 `)
 DateContainer.displayName = 'DateContainer'
 
-// const girlImgRef = React.createRef<HTMLImageElement>()
-
 export default function YourDate() {
   const unmountSignal = useUnmountedSignal()
   const imgRef = React.useRef<HTMLImageElement>(null)
@@ -35,8 +33,11 @@ export default function YourDate() {
     datePreferences ?? {}
 
   const cardTypeSelectors = useMemo(() => {
-    console.log('updating dates preference selectors')
     const selectors = {
+      likes: makeRandomSelectIterator(likedCategories || []),
+      dislike: makeRandomSelectIterator(dislikedCategories || []),
+      love: makeRandomSelectIterator(lovedCards || []),
+      hate: makeRandomSelectIterator(hatedCards || []),
       chitchat: makeRandomSelectIterator([]),
       feelings: makeRandomSelectIterator(
         feelings.reduce((memo, feeling) => {
@@ -58,10 +59,6 @@ export default function YourDate() {
           return memo
         }, [] as Feelings[]),
       ),
-      likes: makeRandomSelectIterator(likedCategories || []),
-      dislike: makeRandomSelectIterator(dislikedCategories || []),
-      love: makeRandomSelectIterator(lovedCards || []),
-      hate: makeRandomSelectIterator(hatedCards || []),
     }
     if (difficulty?.gameParams.numberOfHates) {
       return {
@@ -84,7 +81,7 @@ export default function YourDate() {
   useEffect(() => {
     let done = false
     const go = async () => {
-      if (unmountSignal.aborted || datePhase !== 'ACTIVE') return
+      if (unmountSignal.aborted) return
 
       try {
         await tick(timeBetweenThoughts)

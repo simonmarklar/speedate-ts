@@ -38,7 +38,7 @@ export const difficulties: Difficulty[] = [
       numberOfLikes: 1,
       numberOfLoves: 1,
       numberOfHates: 2,
-      timeLimit: 5, //30,
+      timeLimit: 8, //30,
       phoneNumberThreshold: 4,
       soulmateThreshold: 7,
     },

@@ -1,14 +1,14 @@
 import { random } from 'lodash'
 
-export default function makeRandomPlucker<T>(sourceArr: T[]) {
+export default function makeRandomPlucker<T>(sourceArr: T[]): Iterator<T> {
   let pool: T[] = [...sourceArr]
   return {
     next() {
-      if (!pool.length) {
-        return {
-          done: true,
-        }
-      }
+      // if (!pool.length) {
+      //   return {
+      //     done: true,
+      //   }
+      // }
       const selectedIndex = random(pool.length - 1)
       pool = pool.filter((i, index) => index === selectedIndex)
 

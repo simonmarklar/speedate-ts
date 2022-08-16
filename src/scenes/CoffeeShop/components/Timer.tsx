@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react'
 import styled from 'styled-components'
 import { useDateNightDispatch } from '../../../hooks/useDateNightState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
-import tick from '../../../lib/tick'
+import tick from '../../../lib/time-passing'
 
 const Digit = styled.div<{ dangerMode: boolean }>`
   background: #000;
@@ -62,7 +62,7 @@ const timerAnimations: Variants = {
         type: 'spring',
         from: 1.12,
         to: 0.7,
-        bounce: 0.6,
+        bounce: 0.9,
         duration: 1,
         repeat: 9,
         repeatType: 'mirror',

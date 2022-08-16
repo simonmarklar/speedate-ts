@@ -1,14 +1,15 @@
 import { random } from 'lodash'
 
-export default function makeRandomSelectIterator<T>(choices: T[]) {
+export default function makeRandomSelectIterator<T>(
+  choices: T[],
+): Iterator<T, T> {
   return {
-    choices,
     next() {
-      const index = random(this.choices.length - 1)
+      const index = random(choices.length - 1)
 
       return {
-        value: this.choices[index],
-        done: this.choices.length === 0,
+        value: choices[index],
+        done: choices.length === 0,
       }
     },
   }

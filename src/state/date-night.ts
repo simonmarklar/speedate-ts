@@ -40,23 +40,18 @@ export const createReducer = (difficulty: Difficulty) => {
     action: DateNightAction,
   ): DateNightState {
     if (!action.type) return currentState
-    console.log(action.type)
+    console.log(action)
 
     switch (action.type) {
       case 'datenight.next': {
         assert(currentState, 'dateNightState should exist')
         assert(difficulty, 'difficulty should exist')
 
+        const dateImage = dateImages.next()
         const datePreferences = generateDatePreferences({
           difficulty: difficulty,
         })
 
-        const dateImage = dateImages.next()
-        if (dateImage.done) {
-          console.log('no more images')
-          return currentState
-        }
-        console.log('date image', { dateImage })
         return {
           ...currentState,
           datePhase: 'SETTING_UP',
@@ -72,9 +67,10 @@ export const createReducer = (difficulty: Difficulty) => {
             : currentState.girlsAlreadySeen,
         }
       }
+
       case 'datenight.startDate': {
         const dateImage = dateImages.next()
-        console.log('date image', { dateImage })
+
         return {
           ...currentState,
           datePhase: 'ACTIVE',
@@ -84,6 +80,7 @@ export const createReducer = (difficulty: Difficulty) => {
               : currentState.girlsAlreadySeen,
         }
       }
+
       case 'datenight.endDate': {
         return {
           ...currentState,
@@ -91,6 +88,7 @@ export const createReducer = (difficulty: Difficulty) => {
           datePreferences: undefined,
         }
       }
+
       case 'player.getCards': {
         assert(currentState, 'dateNightState should exist')
         const cardsLeft = currentState.dealersCards.length
@@ -107,7 +105,7 @@ export const createReducer = (difficulty: Difficulty) => {
             cardsLeft,
           ),
         )
-        console.log({ newCards })
+
         return {
           ...currentState,
           dealersCards: currentState.dealersCards?.filter(
@@ -118,6 +116,7 @@ export const createReducer = (difficulty: Difficulty) => {
             : currentState.playersCards,
         }
       }
+
       case 'player.pickupCard': {
         assert(currentState, 'dateNightState should exist')
         assert(action.value, 'picked up card missing')
@@ -128,6 +127,7 @@ export const createReducer = (difficulty: Difficulty) => {
           selectedCard: card,
         }
       }
+
       case 'player.dropCard': {
         assert(currentState, 'dateNightState should exist')
         assert(action.value, 'picked up card missing')
