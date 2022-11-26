@@ -1,27 +1,33 @@
 import { getDifficulty } from '../lib/difficulties'
+import { screenName as dateScreen } from '../scenes/CoffeeShop'
+import { O } from 'ts-toolbelt'
+import { filterProps } from '../lib/objects'
 
 export type GlobalAction =
-  | ActionWithNoValue<'game.toMenu'>
+  | Action<'game.nextScreen', GameScreenName>
   | Action<'game.start', GameDifficultyName>
 
 export default function globalStateReducer(
   currentState: IGameState,
   action: GlobalAction,
-): IGameState {
+) {
   if (!action.type) return currentState
 
   switch (action.type) {
-    case 'game.toMenu':
+    case 'game.nextScreen':
       return {
-        activeScreen: 'MENU',
+        ...currentState,
+        activeScreen: action.value,
       }
-
     case 'game.start': {
       const difficulty = getDifficulty(action.value)
 
-      const state: Required<IGameState> = {
-        ...currentState,
-        activeScreen: 'DATE',
+      const state: O.Required<
+        IGameState,
+        O.RequiredKeys<IGameState> | 'difficulty'
+      > = {
+        ...filterProps(currentState, 'nextScreen'),
+        activeScreen: dateScreen,
         difficulty,
       }
 

@@ -1,9 +1,9 @@
 import { motion, Variants } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useDateNightDispatch } from '../../../hooks/useDateNightState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
-import tick from '../../../lib/time-passing'
+import { timeIterator } from '../../../lib/time-passing'
 
 const Digit = styled.div<{ dangerMode: boolean }>`
   background: #000;
@@ -26,6 +26,25 @@ const Clock = styled(motion.div)`
   left: 3rem;
 `
 Clock.displayName = 'Clock'
+
+interface ClockProps {
+  timeLeft?: number
+  isInDangerMode: boolean
+}
+function Digits({ timeLeft, isInDangerMode }: ClockProps) {
+  const digits = (timeLeft ?? 0).toString().padStart(2, '0').split('')
+  return (
+    <>
+      {digits.map((digit, index) => {
+        return (
+          <Digit dangerMode={isInDangerMode} key={index}>
+            {digit}
+          </Digit>
+        )
+      })}
+    </>
+  )
+}
 
 interface Props {
   dateLength?: number
@@ -83,63 +102,72 @@ const timerAnimations: Variants = {
 export default function Timer({ dateLength, isOn = false }: Props) {
   const [timeLeft, setTimeLeft] = useState(dateLength)
   const dispatch = useDateNightDispatch()
-  const unmountSignal = useUnmountedSignal()
+  const isUnmounted = useUnmountedSignal('Timer')
 
   useEffect(() => {
-    if (unmountSignal.aborted || !isOn) return
     const go = async () => {
-      try {
-        await tick(1000, unmountSignal)
-        if (!unmountSignal.aborted) {
-          setTimeLeft((current) => {
-            if (current !== undefined) {
-              return Math.max(0, current - 1)
-            } else {
-              return Math.max(0, dateLength || 0)
-            }
-          })
-        }
-      } catch (e) {
-        console.log('unmount signal fired: ', e)
+      if (isUnmounted.aborted) {
+        return
       }
+
+      for await (const tick of timeIterator({
+        lengthInMs: 1000,
+        abortSignal: isUnmounted,
+        maxRunTimeMs: (dateLength ?? 0) * 1000,
+      })) {
+        if (isUnmounted.aborted) {
+          break
+        }
+
+        let done = false
+
+        setTimeLeft((currentTimeLeft) => {
+          if (isUnmounted.aborted) return
+
+          if (currentTimeLeft !== undefined) {
+            const nextTimeLeft = Math.max(0, currentTimeLeft - 1)
+            done = nextTimeLeft <= 0
+            return nextTimeLeft
+          } else {
+            return Math.max(0, dateLength ?? 0)
+          }
+        })
+
+        if (done) {
+          break
+        }
+      }
+
+      dispatch('datenight.endDate')
     }
 
-    if (timeLeft === undefined) {
+    if (timeLeft === undefined || !isOn) {
       return
     }
 
-    if (timeLeft > 0) {
-      go()
-    } else if (timeLeft <= 0) {
-      dispatch('datenight.endDate')
+    if (timeLeft === dateLength && isOn) {
+      try {
+        go()
+      } catch (e) {
+        console.error(e)
+      }
     }
-  }, [
-    dateLength,
-    dispatch,
-    isOn,
-    timeLeft,
-    unmountSignal,
-    unmountSignal.aborted,
-  ])
+  }, [dateLength, dispatch, isOn, timeLeft])
 
-  const isInDangerMode = useMemo(
-    () => isOn && (timeLeft ?? 0) < 10,
-    [isOn, timeLeft],
-  )
+  const isInDangerMode = isOn && (timeLeft ?? 0) < 10
 
   return (
-    <Clock
-      variants={timerAnimations}
-      animate={!isOn ? 'initial' : isInDangerMode ? 'danger' : 'animate'}
-      initial="initial"
-      exit="exit"
-    >
-      <Digit dangerMode={isInDangerMode}>
-        {timeLeft?.toString().padStart(2, '0').split('')[0]}
-      </Digit>
-      <Digit dangerMode={isInDangerMode}>
-        {timeLeft?.toString().padStart(2, '0').split('')[1]}
-      </Digit>
-    </Clock>
+    <>
+      {isOn && (
+        <Clock
+          variants={timerAnimations}
+          animate={!isOn ? 'initial' : isInDangerMode ? 'danger' : 'animate'}
+          initial="initial"
+          exit="exit"
+        >
+          <Digits isInDangerMode={isInDangerMode} timeLeft={timeLeft} />
+        </Clock>
+      )}
+    </>
   )
 }

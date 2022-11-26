@@ -1,8 +1,8 @@
-import { assert } from '../lib/types/type-helpers'
+import { assertExists } from '../lib/types/assertions'
 import generateDatePreferences from '../lib/generate-date-preferences'
 import { cards, PLAYER_MAX_CARDS, MAX_DATE_IMAGES } from '../config'
 import { cardIsInCategory, takeCards } from '../lib/cards-categories'
-import makeRandomPlucker from '../lib/random-pluck'
+import { makeRandomPlucker } from '../lib/iterators'
 import { sequence } from '../lib/array-utils'
 
 export type DateNightAction =
@@ -40,14 +40,14 @@ export const createReducer = (difficulty: Difficulty) => {
     action: DateNightAction,
   ): DateNightState {
     if (!action.type) return currentState
-    console.log(action)
+    console.log('date night state update: ', action)
 
     switch (action.type) {
       case 'datenight.next': {
-        assert(currentState, 'dateNightState should exist')
-        assert(difficulty, 'difficulty should exist')
+        assertExists(currentState, 'dateNightState should exist')
+        assertExists(difficulty, 'difficulty should exist')
 
-        const dateImage = dateImages.next()
+        const dateImage = dateImages.next().value
         const datePreferences = generateDatePreferences({
           difficulty: difficulty,
         })
@@ -90,7 +90,7 @@ export const createReducer = (difficulty: Difficulty) => {
       }
 
       case 'player.getCards': {
-        assert(currentState, 'dateNightState should exist')
+        assertExists(currentState, 'dateNightState should exist')
         const cardsLeft = currentState.dealersCards.length
 
         if (cardsLeft === 0) {
@@ -118,8 +118,8 @@ export const createReducer = (difficulty: Difficulty) => {
       }
 
       case 'player.pickupCard': {
-        assert(currentState, 'dateNightState should exist')
-        assert(action.value, 'picked up card missing')
+        assertExists(currentState, 'dateNightState should exist')
+        assertExists(action.value, 'picked up card missing')
         const { card } = action.value
 
         return {
@@ -129,8 +129,8 @@ export const createReducer = (difficulty: Difficulty) => {
       }
 
       case 'player.dropCard': {
-        assert(currentState, 'dateNightState should exist')
-        assert(action.value, 'picked up card missing')
+        assertExists(currentState, 'dateNightState should exist')
+        assertExists(action.value, 'picked up card missing')
         const { card, isDiscarding } = action.value
 
         const playersCards = isDiscarding

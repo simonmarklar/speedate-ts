@@ -1,9 +1,9 @@
 import { difficulties } from '../config'
-import { assert } from './types/type-helpers'
+import { assertExists } from './types/assertions'
 
 export function getDifficulty(name: GameDifficultyName): Difficulty {
   const difficulty = difficulties.find((d) => d.name === name)
-  assert(difficulty, 'Difficulty not found')
+  assertExists(difficulty, `Difficulty "${name}" not found`)
 
   return difficulty
 }

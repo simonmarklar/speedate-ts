@@ -1,9 +1,14 @@
 import styled from 'styled-components'
 
-import { AnimatePresence, motion, Variants } from 'framer-motion'
+import {
+  AnimatePresence,
+  AnimationControls,
+  motion,
+  Variants,
+} from 'framer-motion'
 import React, { useEffect } from 'react'
 
-import PlayersCard from '../../../components/Card'
+import PlayersCard from '../../../components/Card/Card'
 
 import {
   useDateNightDispatch,
@@ -11,7 +16,7 @@ import {
 } from '../../../hooks/useDateNightState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
 
-const cardVariants: Variants = {
+const cardAnimations: Variants = {
   initial: {
     y: 200,
     opacity: 0,
@@ -21,8 +26,8 @@ const cardVariants: Variants = {
     rotate: 360,
     transition: {
       type: 'spring',
-      duration: 1.5,
-      delay: index * 0.25,
+      duration: 0.75,
+      delay: index * 0.15,
     },
   }),
   enter: (index: number) => {
@@ -31,7 +36,7 @@ const cardVariants: Variants = {
       y: 0,
       transition: {
         ease: 'easeOut',
-        delay: index * 0.25,
+        delay: index * 0.15,
         duration: 0.25,
       },
     }
@@ -73,12 +78,13 @@ CardHolder.displayName = 'CardHolder'
 
 interface Props {
   discardTarget: React.RefObject<HTMLDivElement>
+  animate: AnimationControls
 }
 
-export default function PlayersCards({ discardTarget }: Props) {
+export default function PlayersCards({ discardTarget, animate }: Props) {
   const dispatchDateNightAction = useDateNightDispatch()
   const { playersCards, selectedCard, datePhase } = useDateNightState()
-  const unmountSignal = useUnmountedSignal()
+  const unmountSignal = useUnmountedSignal('PlayersCards')
 
   useEffect(() => {
     if (playersCards && playersCards.length < 5 && !unmountSignal.aborted) {
@@ -88,7 +94,7 @@ export default function PlayersCards({ discardTarget }: Props) {
 
   return (
     <CardHolder inherit={false}>
-      <AnimatePresence>
+      <AnimatePresence initial={true}>
         {playersCards.map(function renderCard(card, index) {
           return (
             <PlayersCard
@@ -96,9 +102,9 @@ export default function PlayersCards({ discardTarget }: Props) {
               isFaceDown={datePhase === 'FINISHED'}
               key={card.name}
               custom={index}
-              variants={cardVariants}
+              variants={cardAnimations}
               initial="initial"
-              animate={'enter'}
+              animate="enter"
               exit={selectedCard?.name === card.name ? 'drop' : 'exit'}
               whileDrag="dragging"
               drag={datePhase === 'ACTIVE'}
@@ -126,14 +132,14 @@ export default function PlayersCards({ discardTarget }: Props) {
                   })
                 }
               }}
-              onAnimationComplete={(variantName) => {
-                if (
-                  variantName === 'enter' &&
-                  index >= playersCards.length - 1
-                ) {
-                  dispatchDateNightAction('datenight.startDate')
-                }
-              }}
+              // onAnimationComplete={(variantName) => {
+              //   if (
+              //     variantName === 'enter' &&
+              //     index >= playersCards.length - 1
+              //   ) {
+              //     console.log('all done - timer should not have started yet')
+              //   }
+              // }}
             />
           )
         })}

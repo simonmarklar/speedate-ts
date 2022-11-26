@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { motion, Variants } from 'framer-motion'
 import { useEffect, useMemo, useState } from 'react'
 import * as React from 'react'
 import styled from 'styled-components'
@@ -9,11 +9,9 @@ import {
   feelings,
   talk,
 } from '../../../characters/girls/speech-templates'
-import { useDateNightState } from '../../../hooks/useDateNightState'
-import { useGameState } from '../../../hooks/useGameState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
-import makeRandomSelectIterator from '../../../lib/random-select'
-import tick from '../../../lib/time-passing'
+import { makeRandomSelectIterator } from '../../../lib/iterators'
+import { timeIterator } from '../../../lib/time-passing'
 import SpeechBubble from './SpeechBubble'
 import { timeBetweenThoughts } from '../../../config'
 
@@ -24,11 +22,49 @@ const DateContainer = motion(styled.div`
 `)
 DateContainer.displayName = 'DateContainer'
 
-export default function YourDate() {
-  const unmountSignal = useUnmountedSignal()
+const dateAnimationVariants: Variants = {
+  initial: {
+    x: 1000,
+    opacity: 0,
+    display: 'flex',
+    flex: '1 1 auto',
+  },
+  enter: {
+    x: -100,
+    opacity: 1,
+    transition: {
+      type: 'spring',
+      duration: 1.5,
+    },
+  },
+  exit: {
+    x: 1000,
+    opacity: 0,
+    transition: {
+      type: 'spring',
+      duration: 1.5,
+      delay: 0,
+    },
+  },
+}
+
+interface YourDateProps {
+  difficulty: Difficulty
+  datePreferences: DatePreferences
+  girlsAlreadySeen: number[]
+  datePhase: DatePhase
+}
+
+export default function YourDate({
+  difficulty,
+  datePreferences,
+  girlsAlreadySeen,
+  datePhase,
+}: YourDateProps) {
+  const isUnmounted = useUnmountedSignal('YourDate')
   const imgRef = React.useRef<HTMLImageElement>(null)
-  const { difficulty } = useGameState()
-  const { datePreferences, girlsAlreadySeen, datePhase } = useDateNightState()
+  // const { difficulty } = useGameState()
+  // const { datePreferences, girlsAlreadySeen, datePhase } = useDateNightState()
   const { likedCategories, dislikedCategories, lovedCards, hatedCards } =
     datePreferences ?? {}
 
@@ -79,15 +115,22 @@ export default function YourDate() {
   const [wordsToSay, setWordsToSay] = useState<string>()
 
   useEffect(() => {
-    let done = false
     const go = async () => {
-      if (unmountSignal.aborted) return
+      if (isUnmounted.aborted) return
 
-      try {
-        await tick(timeBetweenThoughts)
-        if (!unmountSignal.aborted) {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      for await (const _tick of timeIterator({
+        lengthInMs: timeBetweenThoughts,
+        abortSignal: isUnmounted,
+      })) {
+        if (isUnmounted.aborted) {
+          setWordsToSay((_state) => undefined)
+          break
+        }
+
+        setWordsToSay((wordsToSay) => {
           if (wordsToSay) {
-            setWordsToSay(undefined)
+            return undefined
           } else {
             const cardType = cardTypeSelectors.feelings.next().value
             const card = cardTypeSelectors[cardType]?.next().value
@@ -97,20 +140,21 @@ export default function YourDate() {
               subject = typeof card === 'string' ? card : card.name
             }
 
-            setWordsToSay(talk(subject, cardType))
+            return talk(subject, cardType)
           }
-        }
-      } catch (e) {
-        setWordsToSay(undefined)
-        console.error(e)
+        })
       }
     }
 
-    if (datePhase === 'ACTIVE' && !done) {
-      done = true
-      go()
+    if (datePhase === 'ACTIVE') {
+      console.log('triggering speech loop')
+      try {
+        go()
+      } catch (e) {
+        console.error(e)
+      }
     }
-  }, [cardTypeSelectors, datePhase, unmountSignal.aborted, wordsToSay])
+  }, [cardTypeSelectors, datePhase, isUnmounted])
 
   const imgId = useMemo(
     () => girlsAlreadySeen[girlsAlreadySeen.length - 1],
@@ -120,9 +164,14 @@ export default function YourDate() {
   return (
     <DateContainer>
       {wordsToSay && <SpeechBubble imgRef={imgRef}>{wordsToSay}</SpeechBubble>}
-      <Girl dateNumber={imgId} ref={imgRef} />
+      <motion.div
+        variants={dateAnimationVariants}
+        initial="initial"
+        exit="exit"
+        animate="enter"
+      >
+        <Girl dateNumber={imgId} ref={imgRef} />
+      </motion.div>
     </DateContainer>
   )
 }
-
-// export default motion(YourDate)

@@ -145,3 +145,5 @@ export default function MenuScreen() {
     </>
   )
 }
+
+export const screenName: GameScreenName = 'MENU'

@@ -1,13 +1,19 @@
-import { useEffect, useMemo } from 'react'
+import { useEffect, useRef } from 'react'
 
-export default function useUnmountedSignal() {
-  const controller = useMemo(() => new AbortController(), [])
+export default function useUnmountedSignal(componentName?: string) {
+  const controllerRef = useRef(new AbortController())
 
   useEffect(() => {
-    return () => {
-      controller.abort()
+    console.log(`${componentName} component mounting`)
+    if (controllerRef.current.signal.aborted) {
+      controllerRef.current = new AbortController()
     }
-  }, [controller])
+    const signal = controllerRef.current
+    return () => {
+      console.log(`${componentName} component unmounting`)
+      signal.abort(`${componentName} component unmounting`)
+    }
+  }, [controllerRef.current.signal.aborted])
 
-  return controller.signal
+  return controllerRef.current.signal
 }

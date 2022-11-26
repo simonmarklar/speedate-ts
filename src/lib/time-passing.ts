@@ -11,7 +11,24 @@ export default function timePassing(
 
     abortSignal?.addEventListener('abort', () => {
       clearTimeout(timeoutId)
-      reject('aborted')
+      // reject('aborted')
     })
   })
+}
+
+export async function* timeIterator({
+  lengthInMs,
+  maxRunTimeMs = Infinity,
+  abortSignal,
+}: {
+  lengthInMs: number
+  maxRunTimeMs?: number
+  abortSignal: AbortSignal
+}) {
+  let tickCount = 0
+  while (!abortSignal.aborted || tickCount * 1000 <= maxRunTimeMs) {
+    yield ++tickCount
+
+    await timePassing(lengthInMs, abortSignal)
+  }
 }

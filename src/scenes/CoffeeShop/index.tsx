@@ -15,9 +15,15 @@ export default function CoffeeShop() {
   return (
     <DateNightStateProvider difficulty={difficulty}>
       <TableForTwo />
-      <button onClick={() => dispatchGameAction({ type: 'game.toMenu' })}>
+      <button
+        onClick={() =>
+          dispatchGameAction({ type: 'game.nextScreen', value: 'DATE' })
+        }
+      >
         Menu
       </button>
     </DateNightStateProvider>
   )
 }
+
+export const screenName: GameScreenName = 'DATE'

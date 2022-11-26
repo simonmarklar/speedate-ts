@@ -1,3 +1,5 @@
+import { O } from 'ts-toolbelt'
+
 type Difference<Source extends {}, Target extends {}> = Pick<
   Source,
   Exclude<keyof Source, keyof Target>
@@ -36,3 +38,12 @@ type StrictUnionHelper<T, TAll> = T extends any
   ? T & Partial<Record<Exclude<UnionKeys<TAll>, keyof T>, never>>
   : never
 type StrictUnion<T> = StrictUnionHelper<T, T>
+
+type isObjectKey<O extends {}, PropName extends string> = {
+  [Key in keyof O]: Key extends PropName ? Key : never
+}[string]
+
+// (
+//   propName: infer Key,
+//   obj: O,
+// ) => O[Key] extends never ? never : Key

@@ -1,7 +1,7 @@
 import styled from 'styled-components'
 import { motion, Variants } from 'framer-motion'
-import Menu from '../scenes/Menu'
-import CoffeeShop from '../scenes/CoffeeShop'
+import Menu, { screenName as menuScreenName } from '../scenes/Menu'
+import CoffeeShop, { screenName as dateScreenName } from '../scenes/CoffeeShop'
 import Switch from '../components/Switch'
 import useRemoveComponentIfSafe from '../hooks/useRemoveComponentIfSafe'
 import { useGameState } from '../hooks/useGameState'
@@ -17,6 +17,7 @@ const screenAnimations: Variants = {
       ease: 'easeOut',
       duration: 0.25,
       delay: 0.1,
+      when: 'afterChildren',
     },
   },
   exit: {
@@ -24,6 +25,7 @@ const screenAnimations: Variants = {
     transition: {
       ease: 'circOut',
       duration: 0.5,
+      when: 'before Children',
     },
   },
 }
@@ -48,10 +50,10 @@ function Screen({ name }: { name: GameScreenName }) {
       exit="exit"
     >
       <Switch value={name}>
-        <Switch.Case value="MENU" key="MENU">
+        <Switch.Case value={menuScreenName} key={menuScreenName}>
           <Menu />
         </Switch.Case>
-        <Switch.Case value="DATE" key="DATE">
+        <Switch.Case value={dateScreenName} key={dateScreenName}>
           <CoffeeShop />
         </Switch.Case>
       </Switch>
@@ -61,8 +63,9 @@ function Screen({ name }: { name: GameScreenName }) {
 
 export default function ScreenSelector() {
   const state = useGameState()
+
   return (
-    <AnimatePresence initial={false} exitBeforeEnter>
+    <AnimatePresence initial={false} mode="wait">
       <Screen name={state.activeScreen} key={state.activeScreen} />
     </AnimatePresence>
   )

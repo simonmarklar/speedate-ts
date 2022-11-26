@@ -14,6 +14,14 @@ interface Difficulty {
   gameParams: GameParameters
 }
 
+enum GameDifficulty {
+  EASY,
+  MEDIUM,
+  HARD,
+}
+
+type GameDifficultyName = keyof typeof GameDifficulty
+
 interface Card {
   categories: string[]
   name: string
@@ -28,14 +36,6 @@ enum GameScreen {
 }
 
 type GameScreenName = keyof typeof GameScreen
-
-enum GameDifficulty {
-  EASY,
-  MEDIUM,
-  HARD,
-}
-
-type GameDifficultyName = keyof typeof GameDifficulty
 
 interface PlayerState {
   cards: Card[]
@@ -62,6 +62,7 @@ interface DateNightState {
 
 interface IGameState {
   activeScreen: GameScreenName
+  nextScreen?: GameScreenName
   difficulty?: Difficulty
 }
 
