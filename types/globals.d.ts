@@ -1,3 +1,5 @@
+type LogLevel = 'debug' | 'info' | 'off' | 'everything'
+
 interface GameParameters {
   numberOfCategories: number
   numberOfLikes: number
@@ -77,6 +79,7 @@ interface Action<T extends string, V = any> {
   value: V
 }
 type ActionWithNoValue<T extends string> = Omit<Action<T>, 'value'>
+
 
 type ActionTypes<ActionUnion> = Extract<ActionUnion, { value: any }> extends A
   ? A

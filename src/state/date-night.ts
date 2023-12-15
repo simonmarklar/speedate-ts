@@ -4,6 +4,7 @@ import { cards, PLAYER_MAX_CARDS, MAX_DATE_IMAGES } from '../config'
 import { cardIsInCategory, takeCards } from '../lib/cards-categories'
 import { makeRandomPlucker } from '../lib/iterators'
 import { sequence } from '../lib/array-utils'
+import logger from '../lib/log'
 
 export type DateNightAction =
   | ActionWithNoValue<'datenight.next'>
@@ -40,13 +41,12 @@ export const createReducer = (difficulty: Difficulty) => {
     action: DateNightAction,
   ): DateNightState {
     if (!action.type) return currentState
-    console.log('date night state update: ', action)
+    logger.info('date night state update: ', action)
 
     switch (action.type) {
       case 'datenight.next': {
         assertExists(currentState, 'dateNightState should exist')
         assertExists(difficulty, 'difficulty should exist')
-
         const dateImage = dateImages.next().value
         const datePreferences = generateDatePreferences({
           difficulty: difficulty,
@@ -94,7 +94,7 @@ export const createReducer = (difficulty: Difficulty) => {
         const cardsLeft = currentState.dealersCards.length
 
         if (cardsLeft === 0) {
-          console.log('### dealer out of cards')
+          logger.info('### dealer out of cards')
           return currentState
         }
 

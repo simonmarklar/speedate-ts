@@ -14,6 +14,7 @@ import { makeRandomSelectIterator } from '../../../lib/iterators'
 import { timeIterator } from '../../../lib/time-passing'
 import SpeechBubble from './SpeechBubble'
 import { timeBetweenThoughts } from '../../../config'
+import logger from '../../../lib/log'
 
 const DateContainer = motion(styled.div`
   height: 100%;
@@ -63,8 +64,6 @@ export default function YourDate({
 }: YourDateProps) {
   const isUnmounted = useUnmountedSignal('YourDate')
   const imgRef = React.useRef<HTMLImageElement>(null)
-  // const { difficulty } = useGameState()
-  // const { datePreferences, girlsAlreadySeen, datePhase } = useDateNightState()
   const { likedCategories, dislikedCategories, lovedCards, hatedCards } =
     datePreferences ?? {}
 
@@ -122,6 +121,7 @@ export default function YourDate({
       for await (const _tick of timeIterator({
         lengthInMs: timeBetweenThoughts,
         abortSignal: isUnmounted,
+        iterId: 'speech #'
       })) {
         if (isUnmounted.aborted) {
           setWordsToSay((_state) => undefined)
@@ -147,7 +147,7 @@ export default function YourDate({
     }
 
     if (datePhase === 'ACTIVE') {
-      console.log('triggering speech loop')
+      logger.debug('triggering speech loop')
       try {
         go()
       } catch (e) {

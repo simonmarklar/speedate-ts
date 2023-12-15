@@ -5,12 +5,15 @@ import React, {
   useReducer,
 } from 'react'
 import { createReducer, init, DateNightAction } from '../state/date-night'
+import { useAsyncAction } from './useAsyncAction'
+import logger from '../lib/log'
 
 type ActionsWithNoValue = ActionTypesWithNoValue<DateNightAction>
 
 interface IDateNightStateContext {
   state: DateNightState
   dispatch: React.Dispatch<DateNightAction>
+  asyncAction: <T>(action: T) => any
 }
 
 const initialDateNightState: DateNightState = {
@@ -24,6 +27,7 @@ const initialDateNightState: DateNightState = {
 const DateNightStateContext = React.createContext<IDateNightStateContext>({
   state: initialDateNightState,
   dispatch: () => undefined,
+  asyncAction: () => () => undefined,
 })
 
 DateNightStateContext.displayName = 'DateNightStateContext'
@@ -42,8 +46,10 @@ export function DateNightStateProvider({
     },
   )
 
+  const asyncAction = useAsyncAction(dispatch)
+
   return (
-    <DateNightStateContext.Provider value={{ state, dispatch }}>
+    <DateNightStateContext.Provider value={{ state, dispatch, asyncAction }}>
       {children}
     </DateNightStateContext.Provider>
   )
@@ -56,12 +62,22 @@ export function useDateNightState(): DateNightState {
 export function useDateNightDispatch() {
   const { dispatch } = useContext(DateNightStateContext)
 
-  return React.useCallback(
-    <T extends DateNightAction['type'] | ActionsWithNoValue>(
-      action: T extends ActionsWithNoValue
-        ? ActionsWithNoValue
-        : DateNightAction,
-    ) => {
+  const handleActions = <
+    T extends
+      | DateNightAction['type']
+      | ActionsWithNoValue
+      | ((action: any) => any),
+  >(
+    action: T extends Function
+      ? any
+      : T extends ActionsWithNoValue
+      ? ActionsWithNoValue
+      : DateNightAction,
+  ) => {
+    logger.debug(action)
+    if (typeof action === 'function') {
+      return action(handleActions)
+    } else {
       dispatch(
         typeof action === 'string'
           ? {
@@ -69,7 +85,8 @@ export function useDateNightDispatch() {
             }
           : action,
       )
-    },
-    [dispatch],
-  )
+    }
+  }
+
+  return React.useCallback(handleActions, [dispatch])
 }

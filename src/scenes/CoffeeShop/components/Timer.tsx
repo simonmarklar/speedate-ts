@@ -3,7 +3,7 @@ import { useCallback, useEffect, useState } from 'react'
 import styled from 'styled-components'
 import { useDateNightDispatch } from '../../../hooks/useDateNightState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
-import { timeIterator } from '../../../lib/time-passing'
+import timePassing, { timeIterator } from '../../../lib/time-passing'
 
 const Digit = styled.div<{ dangerMode: boolean }>`
   background: #000;
@@ -63,6 +63,7 @@ const timerAnimations: Variants = {
     transition: {
       ease: 'easeIn',
       duration: 1.25,
+      delay: 0,
     },
   },
   danger: {
@@ -105,69 +106,51 @@ export default function Timer({ dateLength, isOn = false }: Props) {
   const isUnmounted = useUnmountedSignal('Timer')
 
   useEffect(() => {
-    const go = async () => {
-      if (isUnmounted.aborted) {
+    const startClock = async () => {
+      if (isUnmounted.aborted || dateLength === undefined) {
         return
       }
+
+      await timePassing(2000, isUnmounted)
 
       for await (const tick of timeIterator({
         lengthInMs: 1000,
         abortSignal: isUnmounted,
         maxRunTimeMs: (dateLength ?? 0) * 1000,
+        iterId: 'clock',
       })) {
         if (isUnmounted.aborted) {
           break
         }
 
-        let done = false
-
-        setTimeLeft((currentTimeLeft) => {
-          if (isUnmounted.aborted) return
-
-          if (currentTimeLeft !== undefined) {
-            const nextTimeLeft = Math.max(0, currentTimeLeft - 1)
-            done = nextTimeLeft <= 0
-            return nextTimeLeft
-          } else {
-            return Math.max(0, dateLength ?? 0)
-          }
-        })
-
-        if (done) {
-          break
-        }
+        setTimeLeft(dateLength - tick)
       }
 
+      await timePassing(1500)
       dispatch('datenight.endDate')
     }
 
-    if (timeLeft === undefined || !isOn) {
-      return
-    }
-
-    if (timeLeft === dateLength && isOn) {
+    if (timeLeft === dateLength) {
       try {
-        go()
+        startClock()
       } catch (e) {
         console.error(e)
       }
     }
   }, [dateLength, dispatch, isOn, timeLeft])
 
-  const isInDangerMode = isOn && (timeLeft ?? 0) < 10
+  const isInDangerMode = (timeLeft ?? 0) < 10
 
   return (
     <>
-      {isOn && (
-        <Clock
-          variants={timerAnimations}
-          animate={!isOn ? 'initial' : isInDangerMode ? 'danger' : 'animate'}
-          initial="initial"
-          exit="exit"
-        >
-          <Digits isInDangerMode={isInDangerMode} timeLeft={timeLeft} />
-        </Clock>
-      )}
+      <Clock
+        variants={timerAnimations}
+        animate={timeLeft === undefined ? 'initial' : isInDangerMode ? 'danger' : 'animate'}
+        initial="initial"
+        exit="exit"
+      >
+        <Digits isInDangerMode={isInDangerMode} timeLeft={timeLeft} />
+      </Clock>
     </>
   )
 }

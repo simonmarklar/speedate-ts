@@ -18,6 +18,7 @@ import Timer from './Timer'
 import { useDispatch, useGameState } from '../../../hooks/useGameState'
 import useUnmountedSignal from '../../../hooks/useUnmountedSignal'
 import { screenName } from '../../Menu'
+import timePassing from '../../../lib/time-passing'
 
 const TableContainer = styled.div`
   background: url(${tableImg}) no-repeat center center;
@@ -97,22 +98,29 @@ CardArea.displayName = 'CardArea'
 export default function TableForTwo() {
   const discardCardDropTargetRef = useRef<HTMLDivElement>(null)
   const { difficulty } = useGameState()
-  const dispatchGameAction = useDispatch()
   const { datePreferences, girlsAlreadySeen, datePhase } = useDateNightState()
   const unmountSignal = useUnmountedSignal('TableForTwo')
+  const dispatchGameAction = useDispatch()
   const dispatchDateNightAction = useDateNightDispatch()
-
   const sceneLoadAnimationControls = useAnimationControls()
 
   React.useEffect(() => {
     if (unmountSignal.aborted) return
     switch (datePhase) {
       case 'SETTING_UP': {
-        dispatchDateNightAction('datenight.startDate')
+        dispatchDateNightAction(async (action: string) => {
+          console.log('waiting 2 secs')
+          await timePassing(2000)
+          console.log('starting game')
+          dispatchDateNightAction('datenight.startDate')
+        })
         break
       }
       case 'FINISHED': {
-        dispatchGameAction({ type: 'game.nextScreen', value: screenName })
+        dispatchGameAction(async () => {
+          await timePassing(2000)
+          dispatchGameAction({ type: 'game.nextScreen', value: screenName })
+        })
         break
       }
     }
@@ -135,7 +143,7 @@ export default function TableForTwo() {
         <People>
           <Player spriteId={difficulty?.name} />
           <AnimatePresence>
-            {difficulty && datePreferences && (
+            {difficulty && datePreferences && datePhase === 'ACTIVE'&&(
               <YourDate
                 difficulty={difficulty}
                 datePreferences={datePreferences}

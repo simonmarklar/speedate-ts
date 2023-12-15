@@ -1,3 +1,5 @@
+export const DEBUG_LEVEL: LogLevel = 'debug'
+
 export const PLAYER_MAX_CARDS = 5
 export const MAX_DATE_IMAGES = 10
 

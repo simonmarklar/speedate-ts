@@ -17,7 +17,7 @@ export default function CoffeeShop() {
       <TableForTwo />
       <button
         onClick={() =>
-          dispatchGameAction({ type: 'game.nextScreen', value: 'DATE' })
+          dispatchGameAction({ type: 'game.nextScreen', value: 'MENU' })
         }
       >
         Menu
